@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct compile_process* compile_process_create(const char* filename, const char* out_filename, int flags) {
+compile_process* compile_process_create(const char* filename, const char* out_filename, int flags) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         return NULL;
@@ -16,10 +16,36 @@ struct compile_process* compile_process_create(const char* filename, const char*
         }
     }
 
-    struct compile_process* process = calloc(1, sizeof(struct compile_process));
+    compile_process* process = calloc(1, sizeof(struct compile_process));
     process->flags = flags;
     process->cfile.fp = file;
     process->ofile = out_file;
 
     return process;
+}
+
+char compile_process_next_char(lex_process* lex_process) {
+    compile_process* compiler = lex_process->compiler;
+    compiler->pos.col += 1; 
+
+    char c = getc(compiler->cfile.fp);
+
+    if (c == '\n') {
+        compiler->pos.line += 1;
+        compiler->pos.col = 1;
+    }
+
+    return c;
+}
+
+char compile_process_peek_char(lex_process* lex_process) {
+    compile_process* compiler = lex_process->compiler;
+    char c = getc(compiler->cfile.fp);
+    ungetc(c, compiler->cfile.fp);
+    return c;
+}
+
+void compile_process_push_char(lex_process* lex_process, char c) {
+    compile_process* compiler = lex_process->compiler;
+    ungetc(c, compiler->cfile.fp);
 }
