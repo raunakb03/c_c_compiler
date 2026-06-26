@@ -7,6 +7,18 @@
 #include "helpers/vector.h"
 #include "helpers/buffer.h"
 
+#define NUMERIC_CASE \
+case '0': \
+case '1': \
+case '2': \
+case '3': \
+case '4': \
+case '5': \
+case '6': \
+case '7': \
+case '8': \
+case '9'
+
 enum {
     COMPILER_FILE_COMPILED_OK,
     COMPILER_FAILED_WITH_ERRORS,
@@ -37,6 +49,7 @@ typedef struct pos {
 typedef struct token {
     int type;
     int flags;
+    pos pos;
     union {
         char cval;
         const char* sval;
@@ -84,6 +97,8 @@ struct compile_process {
 };
 
 int compile_file(const char* filename, const char* out_filename, int flags);
+void compiler_error(compile_process* compiler, const char* msg, ...);
+void compiler_warning(compile_process* compiler, const char* msg, ...);
 
 compile_process* compile_process_create(const char* filename, const char* out_filename, int flags);
 char compile_process_next_char(lex_process* lex_process);

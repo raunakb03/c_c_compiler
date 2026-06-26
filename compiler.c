@@ -1,3 +1,6 @@
+#include <stdarg.h>
+#include <stdlib.h>
+
 #include "compiler.h"
 
 lex_process_functions compiler_lex_functions = {
@@ -5,6 +8,28 @@ lex_process_functions compiler_lex_functions = {
     .peek_char = compile_process_peek_char,
     .push_char = compile_process_push_char,
 };
+
+void compiler_error(compile_process* compiler, const char* msg, ...) {
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+
+    fprintf(stderr, " on line %i, col %i in file %s\n", 
+            compiler->pos.line, compiler->pos.col, compiler->pos.filename);
+
+    exit(-1);
+}
+
+void compiler_warning(compile_process* compiler, const char* msg, ...) {
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+
+    fprintf(stderr, " on line %i, col %i in file %s\n", 
+            compiler->pos.line, compiler->pos.col, compiler->pos.filename);
+}
 
 int compile_file(const char* filename, const char* out_filename, int flags) {
     compile_process* process = compile_process_create(filename, out_filename, flags);
